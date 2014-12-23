@@ -1,15 +1,11 @@
 en:
   vagrant_VMM:
-    choose_switch: |-
-      Please choose a switch to attach to your Hyper-V instance.
-      If none of these are appropriate, please open the Hyper-V manager
-      to create a new virtual switch.
     message_already_running: |-
-      Hyper-V instance already running.
+      VM instance is already running.
     message_not_created: |-
       VM not created. Moving on...
     message_not_running: |-
-      Hyper-V machine isn't running. Can't SSH in!
+      VM machine isn't running. Can't SSH in!
 
     errors:
       admin_required: |-
@@ -18,19 +14,6 @@ en:
         Hyper-V requires administrative privileges for management
         commands. Please restart your console with administrative
         privileges and try again.
-      box_invalid: |-
-        The box you're using with the Hyper-V provider ('%{name}')
-        is invalid. A Hyper-V box should contain both a
-        "Virtual Machines" and a "Virtual Hard Disks" folder that are
-        created as part of exporting a Hyper-V machine.
-
-        Within these directories, Vagrant expects to find the
-        virtual machine configuration as well as the root hard disk.
-
-        The box you're attempting to use is missing one or both of
-        these directories or does not contain the files expected. Verify
-        that you added the correct box. If this problem persists,
-        please contact the creator of the box for assistance.
       ip_addr_timeout: |-
         Hyper-V failed to determine your machine's IP address within the
         configured timeout. Please verify the machine properly booted and
@@ -41,16 +24,6 @@ en:
         machine doesn't have the latest Hyper-V integration drivers. Please
         research for your operating system how to install these in order
         for the VM to properly communicate its IP address to Hyper-V.
-      no_switches: |-
-        There are no virtual switches created for Hyper-V! Please open
-        the Hyper-V Manager, go to the "Virtual Switch Manager", and create
-        at least one virtual switch.
-
-        A virtual switch is required for Vagrant to create a Hyper-V
-        machine that is connected to a network so it can access it.
-
-        For more help, please see the documentation on the Vagrant website
-        for Hyper-V.
       powershell_features_disabled: |-
         The Hyper-V cmdlets for PowerShell are not available! Vagrant
         requires these to control Hyper-V. Please enable them in the

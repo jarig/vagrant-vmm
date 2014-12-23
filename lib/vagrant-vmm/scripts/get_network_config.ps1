@@ -23,6 +23,7 @@ $script_block = {
   $vm = Get-SCVirtualMachine -ID $vm_id
   Write-host "Waiting for IP to be assigned for $($vm.ComputerNameString) (id: $vm_id)..."
   $ip = $null
+  $tries = 0
   do {
     sleep -s 1
     $ad = Get-SCVirtualNetworkAdapter -VM $vm -ErrorAction Ignore
@@ -36,8 +37,16 @@ $script_block = {
         $ip = $ips[0].IPAddressToString
       }
     }
-    $timeout -= 1
-  } while ( $ip -eq $null -and $timeout -gt 0 )
+    Write-progress -Activity "Trying to get IP from $($vm.ComputerNameString)" -PercentComplete $($tries*100/$timeout) -Status "Try: $tries"
+    $tries += 1
+  } while ( $ip -eq $null -and $tries -le $timeout )
+  #
+  if ( $ip -eq $null )
+  {
+    # ask for manual IP entry if timedout
+    Write-host "Couldn't get ip for the VM within given timeout, you can get and specify it manually (or leave blank and vagrant will stop)."
+    $ip = Read-Host 'Enter VM IP address:'
+  }
   return @{
     ip =  $ip;
     hostname = $vm.ComputerNameString

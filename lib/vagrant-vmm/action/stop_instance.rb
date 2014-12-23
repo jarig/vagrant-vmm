@@ -15,6 +15,8 @@ module VagrantPlugins
           }
           env[:ui].info("Stopping the machine...")
           env[:machine].provider.driver.stop(options)
+          env[:machine].provider.reset_state
+
           @app.call(env)
         end
       end

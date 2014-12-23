@@ -50,13 +50,18 @@ module VagrantPlugins
         @driver = Driver.new(@machine)
       end
 
+      def current_state
+        @state_id
+      end
+
+      def reset_state
+        @state_id = nil
+      end
+
       def state
         @state_id = :not_created if !@machine.id
 
-        if !@state_id
-          # Run a custom action we define called "read_state" which does
-          # what it says. It puts the state in the `:machine_state_id`
-          # key in the environment.
+        if !@state_id || @state_id == :not_created
           env = @machine.action(:read_state)
           @state_id = env[:machine_state_id]
         end

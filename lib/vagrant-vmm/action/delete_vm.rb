@@ -15,6 +15,8 @@ module VagrantPlugins
           }
           env[:ui].info("Deleting the machine...")
           env[:machine].provider.driver.delete_vm(options)
+          env[:machine].provider.reset_state
+          
           @app.call(env)
         end
       end

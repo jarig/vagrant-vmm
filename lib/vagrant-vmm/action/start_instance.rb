@@ -15,6 +15,9 @@ module VagrantPlugins
           }
           env[:ui].output('Starting the machine...')
           env[:machine].provider.driver.start(options)
+          env[:machine].provider.reset_state
+          env[:ui].output('Machine started')
+
           @app.call(env)
         end
       end

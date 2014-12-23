@@ -15,6 +15,8 @@ module VagrantPlugins
           }
           env[:ui].info("Resuming the machine...")
           env[:machine].provider.driver.resume(options)
+          env[:machine].provider.reset_state
+
           @app.call(env)
         end
       end

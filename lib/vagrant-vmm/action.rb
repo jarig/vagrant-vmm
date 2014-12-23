@@ -107,31 +107,35 @@ module VagrantPlugins
 
       def self.action_start
         Vagrant::Action::Builder.new.tap do |b|
+          #
           b.use Call, IsState, :running do |env1, b1|
             if env1[:result]
               b1.use Message, I18n.t("vagrant_VMM.message_already_running")
               next
             end
 
-            b1.use Call, IsState, :paused do |env2, b2|
-              # if machine was paused
+            b1.use Call, IsState, :poweroff do |env2, b2|
+              # if not started
               if env2[:result]
-                b2.use action_resume
+                b2.use StartInstance
                 next
               end
 
-              b2.use Provision
-              b2.use SyncedFolders
-              b2.use WaitForIPAddress
-              b2.use WaitForCommunicator, [:running]
+              b2.use Call, IsState, :paused do |env3, b3|
+                # if machine was paused
+                if env3[:result]
+                  b3.use action_resume
+                  next
+                end
+              end
             end
           end
+          #
         end
       end
 
       def self.action_up
         Vagrant::Action::Builder.new.tap do |b|
-          b.use HandleBox
           b.use ConfigValidate
           b.use Call, IsState, :not_created do |env1, b1|
             if env1[:result]

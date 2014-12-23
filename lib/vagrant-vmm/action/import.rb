@@ -27,7 +27,6 @@ module VagrantPlugins
           server = env[:machine].provider.driver.import(options)
           env[:ui].detail("Successfully created the VM with name: #{server['name']}")
           env[:machine].id = server["id"]
-          env[:machine].name = server["name"]
           @app.call(env)
         end
       end
