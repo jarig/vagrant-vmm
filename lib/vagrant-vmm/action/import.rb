@@ -23,7 +23,7 @@ module VagrantPlugins
           }
 
           #
-          env[:ui].detail("Creating and registering the VM in the VMM (#{vmm_server_address})...")
+          env[:ui].detail("Creating and registering VM in the VMM (#{vmm_server_address})...")
           server = env[:machine].provider.driver.import(options)
           env[:ui].detail("Successfully created the VM with name: #{server['name']}")
           env[:machine].id = server["id"]
