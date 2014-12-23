@@ -96,7 +96,7 @@ conf.proxy_server_address = 'my-proxy-to-vmm'
 
 ## Contributing
 
-1. Fork it ( https://github.com/[my-github-username]/vagrant-my-plugin/fork )
+1. Fork it ( https://github.com/jarig/vagrant-vmm/fork )
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
