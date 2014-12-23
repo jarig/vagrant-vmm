@@ -41,12 +41,6 @@ $script_block = {
     $tries += 1
   } while ( $ip -eq $null -and $tries -le $timeout )
   #
-  if ( $ip -eq $null )
-  {
-    # ask for manual IP entry if timedout
-    Write-host "Couldn't get ip for the VM within given timeout, you can get and specify it manually (or leave blank and vagrant will stop)."
-    $ip = Read-Host 'Enter VM IP address:'
-  }
   return @{
     ip =  $ip;
     hostname = $vm.ComputerNameString
@@ -55,13 +49,32 @@ $script_block = {
 
 $address_info = execute $script_block $vmm_server_address $proxy_server_address
 $address_to_use = $address_info["ip"]
-try
+
+if ( $address_to_use -ne $null )
 {
-  Write-host "Trying to resolve VM hostname($($address_info["hostname"])) from the current machine."
-  [System.Net.Dns]::GetHostAddresses($address_info["hostname"])
-  $address_to_use = $address_info["hostname"]
-} catch {
-  Write-host "Failed to resolve hostname, so falling back to IP: $address_to_use"
+  try
+  {
+    Write-host "Trying to resolve VM hostname($($address_info["hostname"])) from the current machine."
+    [System.Net.Dns]::GetHostAddresses($address_info["hostname"])
+    $address_to_use = $address_info["hostname"]
+  } catch {
+    Write-host "Failed to resolve hostname, so falling back to IP: $address_to_use"
+  }
+} else {
+  # ask for manual IP entry if timedout
+  Write-host "Couldn't get ip for the VM within given timeout, you can get and specify it manually (or leave blank and vagrant will stop)."
+  $ip = Read-Host 'Enter VM IP address:'
+}
+
+if ( $address_to_use -as [ipaddress] )
+{
+  $trusted_hosts = get-item wsman:\localhost\Client\TrustedHosts
+  if ( !$trusted_hosts.Value.Contains($address_to_use) )
+  {
+    Write-host "Adding $address_to_use to trusted host list"
+    $new_th_values = "$($trusted_hosts.Value),$address_to_use"
+    set-item wsman:\localhost\Client\TrustedHosts $new_th_values -Force
+  }
 }
 
 $resultHash = @{

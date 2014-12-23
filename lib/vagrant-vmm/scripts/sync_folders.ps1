@@ -9,7 +9,9 @@ Param(
   [Parameter(Mandatory=$true)]
   [string]$vm_address,
   [Parameter(Mandatory=$true)]
-  [string]$folders_to_sync
+  [string]$folders_to_sync,
+  [string]$winrm_vm_username,
+  [string]$winrm_vm_password
 )
 # Include the following modules
 $Dir = Split-Path $script:MyInvocation.MyCommand.Path
@@ -61,7 +63,6 @@ function Get-remote-file-hash($source_paths, $delimiter, $session) {
   return Invoke-Command -Session $session -ScriptBlock ${function:Get-file-hash} -ArgumentList $source_paths, $delimiter
 }
 
-$creds_to_vm = Get-Creds $vm_address "Credentials for access to the VM ($vm_address) via WinRM"
 $trusted_hosts = get-item wsman:\localhost\Client\TrustedHosts
 if ( !$trusted_hosts.Value.Contains($vm_address) )
 {
@@ -70,7 +71,13 @@ if ( !$trusted_hosts.Value.Contains($vm_address) )
   set-item wsman:\localhost\Client\TrustedHosts $new_th_values -Force
 }
 
-$session = New-PSSession -ComputerName $vm_address -Credential $creds_to_vm
+$creds_to_vm = Get-Creds $vm_address "Credentials for access to the VM ($vm_address) via WinRM" $winrm_vm_username $winrm_vm_password
+$auth_method = "default"
+if ( !$creds_to_vm.UserName.contains("\") -and !$creds_to_vm.UserName.contains("@") )
+{
+  $auth_method = "basic"
+}
+$session = New-PSSession -ComputerName $vm_address -Credential $creds_to_vm -Authentication $auth_method
 
 # Compare source and destination files
 $remove_files = @{}
@@ -115,7 +122,7 @@ Invoke-Command -Session $session -ScriptBlock {
   {
     Remove-item "$fileshare_dest\*" -recurse -force
   } else {
-    New-item $fileshare_dest -itemtype directory
+    $sync_dir = New-item $fileshare_dest -itemtype directory
   }
   $shr = Get-SmbShare -Name "vagrant-sync" -ErrorAction Ignore
   if ( $shr -eq $null )
@@ -129,6 +136,7 @@ Invoke-Command -Session $session -ScriptBlock {
 Write-host "Getting access from the current machine to the created fileshare (\\$vm_address\vagrant-sync)"
 $vagrant_sync_drive = New-PSDrive -Name 'V' -PSProvider 'FileSystem' -Root "\\$vm_address\vagrant-sync" -Credential $creds_to_vm
 
+Write-host "Syncing files to fileshare..."
 foreach ( $hst_path in $copy_files.Keys)
 {
   $current = 0
@@ -140,7 +148,7 @@ foreach ( $hst_path in $copy_files.Keys)
     $file_path = $hst_path + $file
     $guest_path = $folder_mappings[$hst_path]
     $guest_path = [System.IO.Path]::GetFullPath("$($vagrant_sync_drive.root)\$guest_path")
-    Write-progress -Activity "Syncing $hst_path with $guest_path" -PercentComplete $($current*100/$total) -Status "Copying $file_path"
+    Write-progress -Activity "Syncing $hst_path with $guest_path" -PercentComplete $($current*100/$total) -Status "Copying $file"
     if (Test-Path $file_path -pathtype container)
     {
       # folder

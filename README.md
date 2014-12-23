@@ -92,6 +92,21 @@ If your local machine do not have direct access to the machine that hosts VMM, b
 conf.proxy_server_address = 'my-proxy-to-vmm'
 ```
 
+## Troubleshooting
+
+### Hangs on waiting machine to boot
+
+Check that winrm is configured properly in the VM, if default username is used (vagrant/vagrant) then ensure that winrm accepts unencrypted connection and Basic auth.
+
+Enable basic auth (in VM)
+```
+winrm set winrm/config/service/auth @{Basic="true"}
+```
+
+Allow unencrypted connection (in VM)
+```
+winrm set winrm/config/service @{AllowUnencrypted="true"}
+```
 
 
 ## Contributing

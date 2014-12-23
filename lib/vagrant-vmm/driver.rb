@@ -64,7 +64,7 @@ module VagrantPlugins
         execute('get_vm_status.ps1', options)
       end
 
-       def delete_vm
+       def delete_vm(options)
          options['vm_id'] = vm_id
          execute('delete_vm.ps1', options)
        end

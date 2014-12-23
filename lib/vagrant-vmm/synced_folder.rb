@@ -40,7 +40,9 @@ module VagrantPlugins
         # generate options
         options = {
           vm_address: machine.provider_config.vm_address,
-          folders_to_sync: {}
+          folders_to_sync: {},
+          winrm_vm_username: machine.config.winrm.username,
+          winrm_vm_password: machine.config.winrm.password
         }
         #
         folders.each do |id, data|
@@ -55,7 +57,7 @@ module VagrantPlugins
         # escape quotes
         options[:folders_to_sync] = options[:folders_to_sync].to_json.gsub('"','\\"')
         res = machine.provider.driver.sync_folders(options)
-        machine.ui.detail("Res #{res}")
+        machine.ui.detail("Files synced.")
       end
 
       # This is called to remove the synced folders from a running
