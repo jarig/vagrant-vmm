@@ -17,6 +17,10 @@ module VagrantPlugins
           return false
         end
 
+        if !Vagrant::Util::Platform.windows_admin?
+          raise Errors::AdminRequired
+        end
+
         if !Vagrant::Util::PowerShell.available?
           raise Errors::PowerShellRequired
           return false
@@ -75,19 +79,20 @@ module VagrantPlugins
         "VMM (#{id})"
       end
 
-      #def ssh_info
+      def ssh_info
         # We can only SSH into a running machine
-        #return nil if state.id != :running
+        return nil if state.id != :running
+        address = @machine.provider_config.vm_address || @machine.config.winrm.host
+        if !address
+          #TODO: call wait_for_ip_address
+          return nil
+        end
 
-        # Read the IP of the machine using VMM APIs
-        #network = @driver.read_guest_ip
-        #return nil if !network["ip"]
-
-        #{
-        #  host: network["ip"],
-        #  port: 22,
-        #}
-      #end
+        {
+          host: address,
+          port: 22,
+        }
+      end
     end
   end
 end

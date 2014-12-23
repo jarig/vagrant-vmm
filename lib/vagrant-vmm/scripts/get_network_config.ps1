@@ -19,8 +19,9 @@ $script_block = {
   $vm_id  = $using:vm_id
   $timeout  = $using:timeout
 
-  Write-host "Waiting for IP to be assigned for $vm_id..."
+
   $vm = Get-SCVirtualMachine -ID $vm_id
+  Write-host "Waiting for IP to be assigned for $($vm.ComputerNameString) (id: $vm_id)..."
   $ip = $null
   do {
     sleep -s 1
@@ -37,13 +38,25 @@ $script_block = {
     }
     $timeout -= 1
   } while ( $ip -eq $null -and $timeout -gt 0 )
-  $ip
+  return @{
+    ip =  $ip;
+    hostname = $vm.ComputerNameString
+  }
 }
 
-$ip_address = execute $script_block $vmm_server_address $proxy_server_address
+$address_info = execute $script_block $vmm_server_address $proxy_server_address
+$address_to_use = $address_info["ip"]
+try
+{
+  Write-host "Trying to resolve VM hostname($($address_info["hostname"])) from the current machine."
+  [System.Net.Dns]::GetHostAddresses($address_info["hostname"])
+  $address_to_use = $address_info["hostname"]
+} catch {
+  Write-host "Failed to resolve hostname, so falling back to IP: $address_to_use"
+}
 
 $resultHash = @{
-  ip = "$ip_address"
+  address = $address_to_use
 }
 $result = ConvertTo-Json $resultHash
 Write-Output-Message $result

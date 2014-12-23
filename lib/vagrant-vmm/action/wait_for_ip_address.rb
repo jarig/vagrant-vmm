@@ -23,7 +23,7 @@ module VagrantPlugins
             proxy_server_address: env[:machine].provider_config.proxy_server_address,
             timeout: timeout
           }
-          guest_ip = nil
+          guest_adr = nil
           Timeout.timeout(timeout) do
             while true
               # If a ctrl-c came through, break out
@@ -31,15 +31,15 @@ module VagrantPlugins
 
               # Try to get the IP
               network_info = env[:machine].provider.driver.read_guest_ip(options)
-              guest_ip = network_info["ip"]
+              guest_adr = network_info["address"]
 
-              if guest_ip
+              if guest_adr
                 begin
-                  IPAddr.new(guest_ip)
+                  IPAddr.new(guest_adr)
                   break
                 rescue IPAddr::InvalidAddressError
                   # Ignore, continue looking.
-                  @logger.warn("Invalid IP address returned: #{guest_ip}")
+                  @logger.warn("Invalid IP address returned: #{guest_adr}")
                 end
               end
 
@@ -50,10 +50,10 @@ module VagrantPlugins
           # If we were interrupted then return now
           return if env[:interrupted]
 
-          env[:ui].detail("IP: #{guest_ip}")
-          env[:machine].provider_config.vm_ip = guest_ip
-          env[:machine].ui.outout("IP2: #{env[:machine].provider_config.vm_ip }")
-          
+          env[:ui].detail("VM Address: #{guest_adr}")
+          env[:machine].provider_config.vm_address = guest_adr
+          env[:machine].config.winrm.host = guest_adr
+
           @app.call(env)
         rescue Timeout::Error
           raise Errors::IPAddrTimeout

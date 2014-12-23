@@ -17,7 +17,7 @@ module VagrantPlugins
       # @return [String]
       attr_accessor :vm_host_group_name
       # @return [String]
-      attr_accessor :vm_ip
+      attr_accessor :vm_address
 
       def initialize
         @ip_address_timeout = UNSET_VALUE
@@ -25,7 +25,7 @@ module VagrantPlugins
         @vmm_server_address = UNSET_VALUE
         @vm_template_name   = UNSET_VALUE
         @vm_host_group_name = UNSET_VALUE
-        @vm_ip = UNSET_VALUE
+        @vm_address = UNSET_VALUE
       end
 
       def finalize!

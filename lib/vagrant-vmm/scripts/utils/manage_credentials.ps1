@@ -10,6 +10,7 @@ function Get-Creds($server_address, $prompt_message) {
   } else {
     $credential = Get-Credential -Message $prompt_message
     $credential | Export-CliXml $cred_file
+    Write-host "Credentials for $server_address is cached in $cred_file"
   }
   return $credential
 }

@@ -99,7 +99,7 @@ module VagrantPlugins
        end
 
        def sync_folders(options)
-         execute('sync_folders.ps1', options)
+         execute('sync_folders.ps1', options, true)
        end
 
       protected
@@ -116,7 +116,6 @@ module VagrantPlugins
 
         # Always have a stop error action for failures
         ps_options << "-ErrorAction" << "Stop"
-
         opts = { notify: [:stdout, :stderr, :stdin] }
         Vagrant::Util::PowerShell.execute(path, *ps_options, **opts, &block)
       end

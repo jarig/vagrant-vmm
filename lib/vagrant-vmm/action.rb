@@ -78,9 +78,11 @@ module VagrantPlugins
                 next
               end
 
-              b3.use WaitForIPAddress
+
+              b3.use Provision
               b3.use SyncedFolders
-              #b3.use Provision
+              b3.use WaitForIPAddress
+              b3.use WaitForCommunicator, [:running]
             end
           end
         end
@@ -118,11 +120,10 @@ module VagrantPlugins
                 next
               end
 
+              b2.use Provision
+              b2.use SyncedFolders
               b2.use WaitForIPAddress
               b2.use WaitForCommunicator, [:running]
-              b2.use SetHostname
-              b2.use SyncedFolders
-              b2.use Provision
             end
           end
         end
