@@ -1,0 +1,53 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+data_bags_path = "../data_bags"
+secret_key_path = "~/.chef/encrypted_data_bag_secret"
+validation_key_path = "~/.chef/chef-validator.pem"
+
+Vagrant.configure('2') do |config|
+
+  # Plugins
+  config.omnibus.chef_version = "11.12.8"
+  config.berkshelf.enabled = true
+
+  # Windows 8.1 (64-bit)
+  config.vm.define :win64 do |win64_config|
+    win64_config.vm.hostname = "vmm-test-machine"
+    # required
+    win64_config.vm.guest = :windows
+    # required
+    win64_config.vm.communicator = "winrm"
+
+    win64_config.vm.provider :vmm do |vb|
+      # required
+      vb.vm_template_name   = 'vagrant-template-w8.1-64'
+      # required
+      vb.vm_host_group_name = 'host-group-name'
+      # required
+      vb.vmm_server_address = '192.164.25.10'
+      # optional
+      vb.proxy_server_address = '192.126.48.226'
+    end
+
+    # those 2 not required if vagrant/vagrant used ( defaults anyway )
+    win64_config.winrm.username = "vagrant"
+    win64_config.winrm.password = "vagrant"
+    win64_config.winrm.timeout = 3600
+
+    win64_config.vm.provision :chef_solo do |chef|
+      #chef.log_level = :debug # Default is "info"
+      chef.file_cache_path = 'C:/var/chef/cache'
+      chef.data_bags_path = data_bags_path if ::File.exist?(File.expand_path(data_bags_path))
+      chef.encrypted_data_bag_secret_key_path = secret_key_path  if ::File.exist?(File.expand_path(secret_key_path))
+
+      chef.json = {
+      }
+
+      chef.run_list = [
+        'recipe[chef-solo-search::default]',
+        'recipe[vim-windows::default]'
+      ]
+    end
+  end
+end

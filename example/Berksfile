@@ -1,0 +1,6 @@
+source "https://supermarket.chef.io"
+
+group :integration do
+  cookbook 'chef-solo-search'
+  cookbook 'vim-windows'
+end

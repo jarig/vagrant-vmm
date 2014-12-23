@@ -1,4 +1,5 @@
 /.bundle/
+/.vagrant/
 /.yardoc
 /Gemfile.lock
 /_yardoc/
@@ -12,6 +13,6 @@
 *.o
 *.a
 mkmf.log
-Vagrantfile
-Berksfile
-metadata.rb
+/Vagrantfile
+/Berksfile
+/metadata.rb
