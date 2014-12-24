@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.authors       = ["jarig"]
   spec.email         = ["gjarik@gmail.com"]
   spec.summary       = %q{Plugin for running VMs via Virtual Machine Manager.}
-  spec.description   = %q{TODO: Write a longer description. Optional.}
+  spec.description   = %q{Write a longer description. Optional.}
   spec.homepage      = "https://github.com/jarig"
   spec.license       = "MIT"
 

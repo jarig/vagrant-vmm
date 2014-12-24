@@ -2,7 +2,7 @@ language: ruby
 rvm:
 - 2.0.0
 bundler_args: --without doc guard --jobs 7
-script: bundle exec rake
+script: bundle exec rake build
 deploy:
   provider: rubygems
   api_key:
