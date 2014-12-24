@@ -1,0 +1,14 @@
+language: ruby
+rvm:
+- 2.0.0
+bundler_args: --without doc guard --jobs 7
+script: bundle exec rake build
+
+deploy:
+  provider: rubygems
+  api_key:
+    secure: GmhgrfFN24iE/PMenA1muqrZ3QeygA7GEQAjZaz3mLoBekDlZZxEKdZKKRlVO0Ep7evnh8hklhPRHt8QhTqAKBjaYIJXWJanbhcsPuzShEajDgo6qa+SB/YYPiVqqvS+XGYLwHgZcd9iCEqJsw/z72Kov1bf8L0qXtppIqN1Duc=
+  gem: vagrant-vmm
+  on:
+    repo: ivadim/vagrant-vmm
+    branch: travis_ci_support
