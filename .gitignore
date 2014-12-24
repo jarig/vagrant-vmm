@@ -16,3 +16,4 @@ mkmf.log
 /Vagrantfile
 /Berksfile
 /metadata.rb
+/Berksfile.lock

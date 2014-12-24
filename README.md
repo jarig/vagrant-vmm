@@ -1,3 +1,5 @@
+Travis CI: [![Build Status](https://travis-ci.org/jarig/vagrant-vmm.svg?branch=master)](https://travis-ci.org/jarig/vagrant-vmm)
+
 # Vagrant Virtual Machine Manager (VMM) Plugin
 
 **UNDER DEVELOPMENT**

@@ -9,8 +9,8 @@ Gem::Specification.new do |spec|
   spec.authors       = ["jarig"]
   spec.email         = ["gjarik@gmail.com"]
   spec.summary       = %q{Plugin for running VMs via Virtual Machine Manager.}
-  spec.description   = %q{Write a longer description. Optional.}
-  spec.homepage      = "https://github.com/jarig"
+  spec.description   = %q{This provider will allow you to create VMs in the remote Virtual Machine Manager.}
+  spec.homepage      = "https://github.com/jarig/vagrant-vmm"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")
