@@ -11,3 +11,4 @@ deploy:
   on:
     tags: true
     repo: jarig/vagrant-vmm
+    all_branches: true
