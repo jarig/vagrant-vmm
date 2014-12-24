@@ -3,12 +3,11 @@ rvm:
 - 2.0.0
 bundler_args: --without doc guard --jobs 7
 script: bundle exec rake build
-
 deploy:
   provider: rubygems
   api_key:
-    secure: GmhgrfFN24iE/PMenA1muqrZ3QeygA7GEQAjZaz3mLoBekDlZZxEKdZKKRlVO0Ep7evnh8hklhPRHt8QhTqAKBjaYIJXWJanbhcsPuzShEajDgo6qa+SB/YYPiVqqvS+XGYLwHgZcd9iCEqJsw/z72Kov1bf8L0qXtppIqN1Duc=
+    secure: DAXK2K/QOcfUbt8quDshY0yc1nT0iAMY0i70aOuVX8wChoX4DVE7NKywpbauCqntNtOv28apyg4ih8fGHFOk+bEvQE84SLrLQRXM3urjcITpfFzvkig79VSs0zwb0AjxfQoL5kPHEf5JwRpMGBN9iADHbnJZm85Q8Sk/nauViHc=
   gem: vagrant-vmm
   on:
-    repo: ivadim/vagrant-vmm
-    branch: travis_ci_support
+    tags: true
+    repo: jarig/vagrant-vmm
