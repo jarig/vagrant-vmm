@@ -29,6 +29,17 @@ $Dir = Split-Path $script:MyInvocation.MyCommand.Path
 # convert from json to ps object
 $folders_to_sync_obj = ConvertFrom-Json $folders_to_sync
 $delimiter = " || "
+$creds_to_vm = Get-Creds $vm_address "Credentials for access to the VM ($vm_address) via WinRM" $winrm_vm_username $winrm_vm_password
+
+# add to trusted hosts
+$trusted_hosts = get-item wsman:\localhost\Client\TrustedHosts
+if ( !$trusted_hosts.Value.Contains($vm_address) )
+{
+  Write-host "Adding $vm_address to trusted host list"
+  $new_th_values = "$($trusted_hosts.Value),$vm_address"
+  set-item wsman:\localhost\Client\TrustedHosts $new_th_values -Force
+}
+
 
 function Get-file-hash($source_paths, $delimiter) {
   $source_files = @{}
@@ -63,21 +74,20 @@ function Get-remote-file-hash($source_paths, $delimiter, $session) {
   return Invoke-Command -Session $session -ScriptBlock ${function:Get-file-hash} -ArgumentList $source_paths, $delimiter
 }
 
-$trusted_hosts = get-item wsman:\localhost\Client\TrustedHosts
-if ( !$trusted_hosts.Value.Contains($vm_address) )
-{
-  Write-host "Adding $vm_address to trusted host list"
-  $new_th_values = "$($trusted_hosts.Value),$vm_address"
-  set-item wsman:\localhost\Client\TrustedHosts $new_th_values -Force
+function Get-session {
+  $session = $script:session
+  if ( !$session -or $session.State.ToString() -ne "Opened" )
+  {
+    $auth_method = "default"
+    if ( !$creds_to_vm.UserName.contains("\") -and !$creds_to_vm.UserName.contains("@") )
+    {
+      $auth_method = "basic"
+    }
+    $session = New-PSSession -ComputerName $vm_address -Credential $creds_to_vm -Authentication $auth_method
+    $script:session = $session
+  }
+  return $script:session
 }
-
-$creds_to_vm = Get-Creds $vm_address "Credentials for access to the VM ($vm_address) via WinRM" $winrm_vm_username $winrm_vm_password
-$auth_method = "default"
-if ( !$creds_to_vm.UserName.contains("\") -and !$creds_to_vm.UserName.contains("@") )
-{
-  $auth_method = "basic"
-}
-$session = New-PSSession -ComputerName $vm_address -Credential $creds_to_vm -Authentication $auth_method
 
 # Compare source and destination files
 $remove_files = @{}
@@ -92,7 +102,7 @@ foreach ( $hst_path in $folders_to_sync_obj.psobject.properties.Name )
 }
 
 $source_files = Get-file-hash $folder_mappings.Keys $delimiter
-$destination_files = Get-remote-file-hash $folder_mappings.Values $delimiter $session
+$destination_files = Get-remote-file-hash $folder_mappings.Values $delimiter $(Get-session)
 if (!$destination_files) {
   $destination_files = @{}
 }
@@ -116,7 +126,7 @@ foreach ( $hst_path in $folder_mappings.Keys )
 }
 
 # create file share on the remote machine
-Invoke-Command -Session $session -ScriptBlock {
+Invoke-Command -Session $(Get-session) -ScriptBlock {
   $fileshare_dest = "$($env:SystemDrive)\vagrant-sync"
   if (Test-path $fileshare_dest)
   {
@@ -164,7 +174,7 @@ foreach ( $hst_path in $copy_files.Keys)
 
 # copy from fileshare to the dest locations on the remote machine
 # as well as remove files that shouldn't be there
-Invoke-Command -Session $session -ScriptBlock {
+Invoke-Command -Session $(Get-session) -ScriptBlock {
   $remove_files = $using:remove_files
   $fileshare_dest = "$($env:SystemDrive)\vagrant-sync"
   write-host "$(&hostname) :: Distributing files from $fileshare_dest..."
@@ -194,6 +204,15 @@ Invoke-Command -Session $session -ScriptBlock {
 
 
 Remove-PSSession -Id $session.Id
+
+# remove vm_address from trusted hosts
+$trusted_hosts = get-item wsman:\localhost\Client\TrustedHosts
+if ( $trusted_hosts.Value.Contains($vm_address) )
+{
+  Write-host "Removing $vm_address from trusted host list"
+  $new_th_values = $trusted_hosts.Value -replace ",?$vm_address", ""
+  set-item wsman:\localhost\Client\TrustedHosts $new_th_values -Force
+}
 
 $resultHash = $folder_mappings
 $result = ConvertTo-Json $resultHash

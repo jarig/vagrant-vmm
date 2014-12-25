@@ -2,8 +2,6 @@ Travis CI: [![Build Status](https://travis-ci.org/jarig/vagrant-vmm.svg?branch=m
 
 # Vagrant Virtual Machine Manager (VMM) Plugin
 
-**UNDER DEVELOPMENT**
-
 Vagrant is a tool for building and distributing development environments.
 
 This provider will allow you to create VMs in the remote Virtual Machine Manager.
@@ -100,16 +98,20 @@ conf.proxy_server_address = 'my-proxy-to-vmm'
 
 Check that winrm is configured properly in the VM, if default username is used (vagrant/vagrant) then ensure that winrm accepts unencrypted connection and Basic auth.
 
-Enable basic auth (in VM)
+Enable basic auth and unencrypted connection (in VM).
 ```
+In elevated cmd
 winrm set winrm/config/service/auth @{Basic="true"}
-```
-
-Allow unencrypted connection (in VM)
-```
 winrm set winrm/config/service @{AllowUnencrypted="true"}
 ```
 
+### Unencrypted traffic is currently disabled in the client configuration
+
+Run following command on your machine as well:
+```
+In elevated cmd
+winrm set winrm/config/service @{AllowUnencrypted="true"}
+```
 
 ## Contributing
 

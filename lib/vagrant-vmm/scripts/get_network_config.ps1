@@ -66,16 +66,6 @@ if ( $address_to_use -ne $null )
   $ip = Read-Host 'Enter VM IP address:'
 }
 
-if ( $address_to_use -as [ipaddress] )
-{
-  $trusted_hosts = get-item wsman:\localhost\Client\TrustedHosts
-  if ( !$trusted_hosts.Value.Contains($address_to_use) )
-  {
-    Write-host "Adding $address_to_use to trusted host list"
-    $new_th_values = "$($trusted_hosts.Value),$address_to_use"
-    set-item wsman:\localhost\Client\TrustedHosts $new_th_values -Force
-  }
-}
 
 $resultHash = @{
   address = $address_to_use
