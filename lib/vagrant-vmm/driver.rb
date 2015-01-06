@@ -110,8 +110,10 @@ module VagrantPlugins
         options = options || {}
         ps_options = []
         options.each do |key, value|
-          ps_options << "-#{key}"
-          ps_options << "'#{value}'"
+          unless value.nil?
+            ps_options << "-#{key}"
+            ps_options << "'#{value}'"
+          end
         end
 
         # Always have a stop error action for failures

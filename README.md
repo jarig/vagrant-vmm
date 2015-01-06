@@ -92,6 +92,35 @@ If your local machine do not have direct access to the machine that hosts VMM, b
 conf.proxy_server_address = 'my-proxy-to-vmm'
 ```
 
+### Active Directory settings ( optional )
+
+You can tell the provider to move your VM under some particular OU once it's created.
+Here are required options you need to specify for that.
+
+#### ad_server
+
+URL of AD server. Can be derived by running **echo %LOGONSERVER%** command in CMD of the VM environment.
+Example:
+```
+conf.ad_server = 'my-ad-server.some.domain.local'
+```
+
+#### ad_source_path
+
+Base DN container where VM appears(and it will be moved from) once it's created.
+Example:
+```
+conf.ad_source_path = 'CN=Computers,DC=some,DC=domain,DC=local'
+```
+
+#### ad_target_path
+
+New AD path where VM should be moved to.
+Example:
+```
+conf.ad_target_path = 'OU=Vagrant,OU=Chef-Nodes,DC=some,DC=domain,DC=local'
+```
+
 ## Troubleshooting
 
 ### Hangs on waiting machine to boot

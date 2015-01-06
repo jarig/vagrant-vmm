@@ -57,7 +57,7 @@ module VagrantPlugins
         # escape quotes
         options[:folders_to_sync] = options[:folders_to_sync].to_json.gsub('"','\\"')
         res = machine.provider.driver.sync_folders(options)
-        machine.ui.detail("Files synced.")
+        machine.ui.detail("Synced finished.")
       end
 
       # This is called to remove the synced folders from a running

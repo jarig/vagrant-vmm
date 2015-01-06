@@ -7,7 +7,10 @@ Param(
   [string]$vm_template_name,
   [Parameter(Mandatory=$true)]
   [string]$vm_host_group_name,
-  [string]$proxy_server_address=$null
+  [string]$proxy_server_address=$null,
+  [string]$ad_server=$null,
+  [string]$ad_source_path=$null,
+  [string]$ad_target_path=$null
 )
 
 # Include the following modules
@@ -20,9 +23,11 @@ $script_block = {
   # external vars
   $vm_name            = $using:vm_name
   $vm_host_group_name = $using:vm_host_group_name
-  $vmm_credential     = $using:vmm_credential
   $server_address     = $using:vmm_server_address
   $vm_template_name   = $using:vm_template_name
+  $ad_server          = $using:ad_server
+  $ad_source_path     = $using:ad_source_path
+  $ad_target_path     = $using:ad_target_path
 
   $description = "VM created by vagrant for testing purposes"
   $MinFreeSpaceGB = 300 #
@@ -52,7 +57,6 @@ $script_block = {
                              DiskSpaceGB=$MinFreeSpaceGB;
                              VMName=$vm_name;
                              VMHostGroup=$VMHostGroup;
-                             VMMServer=$vmmServer
                             }
 
       $VMHost = $null
@@ -86,14 +90,37 @@ $script_block = {
                             DelayStartSeconds = $(Get-Random -Minimum 20 -Maximum 100)
                           }
 
-      New-SCVirtualMachine @vmCreateParams
+      $vm = New-SCVirtualMachine @vmCreateParams
     } else {
       Write-Error "Cannot find suitable host for the VM."
     }
   } else {
     Write-Warning "Machine $vm_name already exists on host $($vm.VMHost.Name)"
-    $vm
   }
+  # try to move it in AD
+  try
+  {
+    # move it to under AD path if required
+    if ($ad_target_path -ne $null -and $ad_source_path -ne $null -and $ad_server -ne $null)
+    {
+      $cred_param = @{}
+      if ($proxy_credential)
+      {
+        # if proxy used to overcome credssp auth
+        $cred_param["Credential"] = $proxy_credential
+      }
+      $ad_res = Get-ADComputer -Identity:"CN=$vm_name,$ad_source_path" -Server:$ad_server -ErrorAction Ignore @cred_param 
+      if ( $ad_res -ne $null )
+      {
+        Move-ADObject -Identity:"CN=$vm_name,$ad_source_path" -TargetPath:$ad_target_path -Server:$ad_server @cred_param
+      }
+    }
+  } catch
+  {
+    Write-Warning "Couldn't move under specified OU: $_"
+  }
+  # return vm object
+  $vm
 }
 
 $vm = execute $script_block $vmm_server_address $proxy_server_address

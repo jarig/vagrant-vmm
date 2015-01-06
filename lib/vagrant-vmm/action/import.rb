@@ -19,11 +19,17 @@ module VagrantPlugins
             proxy_server_address: env[:machine].provider_config.proxy_server_address,
             vm_name: env[:machine].config.vm.hostname,
             vm_template_name: env[:machine].provider_config.vm_template_name,
-            vm_host_group_name: env[:machine].provider_config.vm_host_group_name
+            vm_host_group_name: env[:machine].provider_config.vm_host_group_name,
+            ad_server: env[:machine].provider_config.ad_server,
+            ad_source_path: env[:machine].provider_config.ad_source_path,
+            ad_target_path: env[:machine].provider_config.ad_target_path
           }
 
           #
           env[:ui].detail("Creating and registering VM in the VMM (#{vmm_server_address})...")
+          if options[:ad_server] && options[:ad_source_path] && options[:ad_target_path]
+            env[:ui].detail("  ..and moving it under #{options[:ad_target_path]} after it's created.")
+          end
           server = env[:machine].provider.driver.import(options)
           env[:ui].detail("Successfully created the VM with name: #{server['name']}")
           env[:machine].id = server["id"]
