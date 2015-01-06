@@ -1,4 +1,6 @@
-Travis CI: [![Build Status](https://travis-ci.org/jarig/vagrant-vmm.svg?branch=master)](https://travis-ci.org/jarig/vagrant-vmm)
+|Travis CI|Gem|
+|----|-----|
+| [![Build Status](https://travis-ci.org/jarig/vagrant-vmm.svg?branch=master)](https://travis-ci.org/jarig/vagrant-vmm)|[![Gem Version](https://badge.fury.io/rb/vagrant-vmm.svg)](http://badge.fury.io/rb/vagrant-vmm)|
 
 # Vagrant Virtual Machine Manager (VMM) Plugin
 
