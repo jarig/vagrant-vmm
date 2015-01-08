@@ -43,24 +43,14 @@ $script_block = {
   #
   return @{
     ip =  $ip;
-    hostname = $vm.ComputerNameString
   }
 }
 
 $address_info = execute $script_block $vmm_server_address $proxy_server_address
 $address_to_use = $address_info["ip"]
 
-if ( $address_to_use -ne $null )
+if ( $address_to_use -eq $null )
 {
-  try
-  {
-    Write-host "Trying to resolve VM hostname($($address_info["hostname"])) from the current machine."
-    [System.Net.Dns]::GetHostAddresses($address_info["hostname"])
-    $address_to_use = $address_info["hostname"]
-  } catch {
-    Write-host "Failed to resolve hostname, so falling back to IP: $address_to_use"
-  }
-} else {
   # ask for manual IP entry if timedout
   Write-host "Couldn't get ip for the VM within given timeout, you can get and specify it manually (or leave blank and vagrant will stop)."
   $ip = Read-Host 'Enter VM IP address:'
