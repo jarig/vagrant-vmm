@@ -31,10 +31,13 @@ $script_block = {
     {
       $ip = $ad.IPv4Addresses[0]
     } else {
-      $ips = [System.Net.Dns]::GetHostAddresses($vm.ComputerNameString)
-      if ( $ips.count -gt 0 )
-      {
-        $ip = $ips[0].IPAddressToString
+      try {
+        $ips = [System.Net.Dns]::GetHostAddresses($vm.ComputerNameString)
+        if ( $ips.count -gt 0 )
+        {
+          $ip = $ips[0].IPAddressToString
+        }
+      }catch{
       }
     }
     Write-progress -Activity "Trying to get IP from $($vm.ComputerNameString)" -PercentComplete $($tries*100/$timeout) -Status "Try: $tries"
