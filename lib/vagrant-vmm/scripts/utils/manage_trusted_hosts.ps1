@@ -5,7 +5,12 @@ function Add-To-Trusted($address)
   $trusted_hosts = get-item wsman:\localhost\Client\TrustedHosts
   if ( $address -as [ipaddress] -and !$trusted_hosts.Value.Contains($address) )
   {
-    $new_th_values = "$($trusted_hosts.Value),$address"
+    if ($trusted_hosts.Value)
+    {
+      $new_th_values = "$($trusted_hosts.Value),$address"
+    } else {
+      $new_th_values = $address
+    }
     set-item wsman:\localhost\Client\TrustedHosts $new_th_values -Force
   }
 }
