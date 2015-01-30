@@ -144,12 +144,12 @@ if ( $sync_required )
       Write-host "$(&hostname) :: Creating fileshare on the remote host in $fileshare_dest, granting access to Everyone"
       $shr = New-SmbShare -Name "vagrant-sync" -Temporary -Path $fileshare_dest
     }
-    $g_info = Grant-SmbShareAccess -InputObject $shr -AccountName Everyone -AccessRight Full -Force -Confirm
+    $g_info = Grant-SmbShareAccess -InputObject $shr -AccountName "$($env:USERDOMAIN)\$($env:USERNAME)" -AccessRight Full -Force
   }
 
   # get access to the fileshare from the current machine
   Write-host "Getting access from the current machine to the created fileshare (\\$vm_address\vagrant-sync)"
-  $vagrant_sync_drive = New-PSDrive -Name 'V' -PSProvider 'FileSystem' -Root "\\$vm_address\vagrant-sync"
+  $vagrant_sync_drive = New-PSDrive -Name 'V' -PSProvider 'FileSystem' -Root "\\$vm_address\vagrant-sync" -Credential $creds_to_vm
 
   Write-host "Syncing files to fileshare..."
   foreach ( $hst_path in $copy_files.Keys )
