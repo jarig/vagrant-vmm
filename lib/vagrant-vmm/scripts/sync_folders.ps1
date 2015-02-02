@@ -78,6 +78,7 @@ function Get-session {
     {
       $auth_method = "basic"
     }
+    set-item -force WSMan:\localhost\Client\AllowUnencrypted $true -ErrorAction Ignore
     $session = New-PSSession -ComputerName $vm_address -Credential $creds_to_vm -Authentication $auth_method
     $script:session = $session
   }

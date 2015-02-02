@@ -6,13 +6,13 @@ $Dir = Split-Path $script:MyInvocation.MyCommand.Path
 # execute script block for VMM
 function execute($block, $vmm_server_address, $proxy_server_address)
 {
-  $vmm_credential = Get-Creds $vmm_server_address "Credentials for VMM server: $vmm_server_address"
   $proxy_credential = $null
-
   if ($proxy_server_address -ne $null )
   {
     $proxy_credential = Get-Creds $proxy_server_address "Credentials for proxy server: $proxy_server_address"
   }
+  $vmm_credential = Get-Creds $vmm_server_address "Credentials for VMM server: $vmm_server_address"
+  
   #
   $init_vmm_block = {
     try {
