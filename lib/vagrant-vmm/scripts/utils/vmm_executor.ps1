@@ -35,7 +35,8 @@ function execute($block, $vmm_server_address, $proxy_server_address)
   } else
   {
     Add-To-Trusted $proxy_server_address
-    $res = invoke-command -ComputerName $proxy_server_address -Credential $proxy_credential -ScriptBlock $block_to_run
+    $so = New-PSSessionOption -IdleTimeout 240000 
+    $res = invoke-command -ComputerName $proxy_server_address -Credential $proxy_credential -ScriptBlock $block_to_run -SessionOption $so
     Remove-From-Trusted $proxy_server_address
   }
   return $res

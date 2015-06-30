@@ -21,6 +21,8 @@ $script_block = {
 
 
   $vm = Get-SCVirtualMachine -ID $vm_id
+  $vm = Read-SCVirtualMachine -VM $vm
+
   Write-host "Waiting for IP to be assigned for $($vm.ComputerNameString) (id: $vm_id)..."
   $ip = $null
   $tries = 0
