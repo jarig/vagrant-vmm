@@ -162,7 +162,7 @@ if ( $sync_required )
     {
       $current += 1
       $file_path = $hst_path + $file
-      $guest_path = $folder_mappings[$hst_path]
+      $guest_path = Split-Path $folder_mappings[$hst_path] -NoQualifier
       $guest_path = [System.IO.Path]::GetFullPath("$($vagrant_sync_drive.root)\$guest_path")
       Write-progress -Activity "Syncing $hst_path with $guest_path" -PercentComplete $($current*100/$total) -Status "Copying $file"
       if (Test-Path $file_path -pathtype container)
