@@ -57,7 +57,7 @@ function Get-file-hash($source_paths, $delimiter) {
       # get empty dirs, set hash to be 0 for them
       Get-ChildItem $source_path_normalized -recurse |
         Where-Object {$_.PSIsContainer -eq $True} |
-          Where-Object {$_.GetFiles().Count -eq 0} |
+          Where-Object {$_.GetFiles().Count -eq 0 -and $_.GetDirectories().Count -eq 0} |
             Select-Object FullName | ForEach-Object -Process {
               $source_files[$source_path] += $_.FullName.Replace($source_path_normalized, "") + $delimiter + "0"
             }

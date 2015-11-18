@@ -112,22 +112,38 @@ function Send-File
                         $position = 0 
                          
                         ## Go through the input, and fill in the new array of file content 
-                        foreach ($chunk in $input) 
-                        { 
-                            [GC]::Collect() 
-                            [Array]::Copy($chunk, 0, $destBytes, $position, $chunk.Length) 
-                            $position += $chunk.Length 
-                        } 
-                         
-                        [IO.File]::WriteAllBytes($fileDest, $destBytes) 
+                        if ( $input )
+                        {
+                            foreach ($chunk in $input) 
+                            { 
+                                [GC]::Collect() 
+                                [Array]::Copy($chunk, 0, $destBytes, $position, $chunk.Length) 
+                                $position += $chunk.Length 
+                            }
+                        }
+
+                        if ( $position -eq 0 )
+                        {
+                          # create empty file
+                          New-Item $fileDest -type file
+                        } else 
+                        {
+                          [IO.File]::WriteAllBytes($fileDest, $destBytes) 
+                        }
                          
                         #Get-Item $fileDest 
                         [GC]::Collect() 
-                    } 
+                    }
                      
                     # Stream the chunks into the remote script. 
                     $Length = $sourceBytes.Length 
-                    $streamChunks | Invoke-Command -Session $Session -ScriptBlock $remoteScript 
+                    if ( $Length -eq 0 )
+                    {
+                      $res = Invoke-Command -Session $Session -ScriptBlock $remoteScript 
+                    } else 
+                    {
+                      $streamChunks | Invoke-Command -Session $Session -ScriptBlock $remoteScript 
+                    }
                     Write-Verbose -Message "WinRM copy of [$($p)] to [$($Destination)] complete" 
                 } 
             } 
