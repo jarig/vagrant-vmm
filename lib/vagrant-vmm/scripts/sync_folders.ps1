@@ -18,6 +18,7 @@ $Dir = Split-Path $script:MyInvocation.MyCommand.Path
 . ([System.IO.Path]::Combine($Dir, "utils\write_messages.ps1"))
 . ([System.IO.Path]::Combine($Dir, "utils\manage_credentials.ps1"))
 . ([System.IO.Path]::Combine($Dir, "utils\manage_trusted_hosts.ps1"))
+. ([System.IO.Path]::Combine($Dir, "utils\send_file.ps1"))
 
 # Sync flow:
 # get list of files to sync, compare hashes with the remote ones
@@ -131,7 +132,7 @@ foreach ( $hst_path in $folder_mappings.Keys )
 if ( $sync_required )
 {
   # create file share on the remote machine
-  Invoke-Command -Session $(Get-session) -ScriptBlock {
+  $fileshare_dest = Invoke-Command -Session $(Get-session) -ScriptBlock {
     $fileshare_dest = "$($env:SystemDrive)\vagrant-sync"
     if (Test-path $fileshare_dest)
     {
@@ -139,20 +140,14 @@ if ( $sync_required )
     } else {
       $sync_dir = New-item $fileshare_dest -itemtype directory
     }
-    $shr = Get-SmbShare -Name "vagrant-sync" -ErrorAction Ignore
-    if ( $shr -eq $null )
-    {
-      Write-host "$(&hostname) :: Creating fileshare on the remote host in $fileshare_dest, granting access to Everyone"
-      $shr = New-SmbShare -Name "vagrant-sync" -Temporary -Path $fileshare_dest
-    }
-    $g_info = Grant-SmbShareAccess -InputObject $shr -AccountName "$($env:USERDOMAIN)\$($env:USERNAME)" -AccessRight Full -Force
+    return $fileshare_dest
   }
 
   # get access to the fileshare from the current machine
-  Write-host "Getting access from the current machine to the created fileshare (\\$vm_address\vagrant-sync)"
-  $vagrant_sync_drive = New-PSDrive -Name 'V' -PSProvider 'FileSystem' -Root "\\$vm_address\vagrant-sync" -Credential $creds_to_vm
+  Write-host "Prepared folder on $vm_address : $fileshare_dest"
 
   Write-host "Syncing files to fileshare..."
+  $session = $(Get-session)
   foreach ( $hst_path in $copy_files.Keys )
   {
     $current = 0
@@ -163,24 +158,23 @@ if ( $sync_required )
       $current += 1
       $file_path = $hst_path + $file
       $guest_path = Split-Path $folder_mappings[$hst_path] -NoQualifier
-      $guest_path = [System.IO.Path]::GetFullPath("$($vagrant_sync_drive.root)\$guest_path")
-      Write-progress -Activity "Syncing $hst_path with $guest_path" -PercentComplete $($current*100/$total) -Status "Copying $file"
+      $guest_path = [System.IO.Path]::GetFullPath("$fileshare_dest\$guest_path")
+      Write-progress -Activity "Syncing $hst_path with $vm_address :: $guest_path" -PercentComplete $($current*100/$total) -Status "Copying $file"
       if (Test-Path $file_path -pathtype container)
       {
         # folder
-        $out = New-Item $file_path -itemtype directory -ErrorAction Ignore
+        #$out = New-Item $file_path -itemtype directory -ErrorAction Ignore
       } else {
         # file
         $file_dir = split-path $file
-        $out = New-item "$guest_path\$file_dir" -itemtype directory -ErrorAction Ignore
-        Copy-Item $file_path "$guest_path\$file" -recurse
+        Send-File $file_path "$guest_path\$file_dir" $session
       }
     }
   }
 
   # copy from fileshare to the dest locations on the remote machine
   # as well as remove files that shouldn't be there
-  Invoke-Command -Session $(Get-session) -ScriptBlock {
+  Invoke-Command -Session $session -ScriptBlock {
     $remove_files = $using:remove_files
     $fileshare_dest = "$($env:SystemDrive)\vagrant-sync"
     write-host "$(&hostname) :: Distributing files from $fileshare_dest..."

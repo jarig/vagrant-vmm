@@ -10,7 +10,7 @@ This provider will allow you to create VMs in the remote Virtual Machine Manager
 
 ## Installation
 
-Install Vagrant 1.7.1
+Install Vagrant 1.7.4
 ```
 http://www.vagrantup.com/downloads.html
 ```
@@ -47,7 +47,7 @@ win64_config.vm.guest = :windows
 
 Set communicator to **:winrm**
 ```
-win64_config.vm.communicator = "winrm"
+win64_config.vm.communicator = :winrm
 ```
 
 Set you provider to :vmm and specify at least *vmm_server_address*, *vm_host_group_name* and *vm_template_name* parameters.
